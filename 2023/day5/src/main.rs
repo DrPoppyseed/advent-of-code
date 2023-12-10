@@ -144,9 +144,15 @@ fn problem2(path: &str) -> usize {
 
     lines.next();
 
+    let mut remapped_seeds: Vec<(usize, usize)> = vec![];
     while let Some(line) = lines.next() {
-        if line.contains("map") || line.is_empty() {
+        if line.contains("map") {
             continue;
+        } else if line.is_empty() {
+            seeds.append(&mut remapped_seeds);
+            seeds.sort();
+            remapped_seeds = vec![];
+            println!("seed: {seeds:?}");
         } else {
             let Remap {
                 remap_left,
@@ -156,7 +162,6 @@ fn problem2(path: &str) -> usize {
 
             // find out if mapping overlaps with any of the seeds
             // if mapping overlaps with any, update for range
-            let mut remapped_seeds: Vec<(usize, usize)> = vec![];
             while !seeds.is_empty() {
                 let (left, right) = seeds.pop().unwrap();
                 if left <= remap_right && right >= remap_left {
@@ -211,9 +216,9 @@ fn problem2(path: &str) -> usize {
                 }
             }
 
-            seeds.append(&mut remapped_seeds);
-            seeds.sort();
-            println!("remap: {remap_left}-{remap_right}, {remap_diff}   \t| seed: {seeds:?}");
+            // seeds.append(&mut remapped_seeds);
+            // seeds.sort();
+            // println!("remap: {remap_left}-{remap_right}, {remap_diff}   \t| seed: {seeds:?}");
         }
     }
 
