@@ -144,85 +144,85 @@ fn problem2(path: &str) -> usize {
 
     lines.next();
 
-    let mut remapped_seeds: Vec<(usize, usize)> = vec![];
-    while let Some(line) = lines.next() {
-        if line.contains("map") {
-            continue;
-        } else if line.is_empty() {
-            seeds.append(&mut remapped_seeds);
-            seeds.sort();
-            remapped_seeds = vec![];
-            println!("seed: {seeds:?}");
-        } else {
-            let Remap {
-                remap_left,
-                remap_right,
-                remap_diff,
-            } = Remap::from(line.clone());
+    let mappings = |range| {
 
-            // find out if mapping overlaps with any of the seeds
-            // if mapping overlaps with any, update for range
-            while !seeds.is_empty() {
-                let (left, right) = seeds.pop().unwrap();
-                if left <= remap_right && right >= remap_left {
-                    // complete overlap. numbers in [max(remap_left, seed_left),
-                    // min(remap_right, seed_right)] will be remapped
-                    if left >= remap_left && right <= remap_right {
-                        // seed range is inside remap range
-                        println!("{left}-{right} inside");
-                        remapped_seeds.push((
-                            (left as i32 + remap_diff) as usize,
-                            (right as i32 + remap_diff) as usize,
-                        ));
-                    } else if left <= remap_right && right >= remap_right {
-                        // overlaps partially on seed's right
-                        // append portion that overlaps (left, remap_right)
-                        println!("{left}-{right} right");
-                        remapped_seeds.push((
-                            (left as i32 + remap_diff) as usize,
-                            (remap_right as i32 + remap_diff) as usize,
-                        ));
+    };
 
-                        // append portion that doesn't overlap (remap_right, right)
-                        remapped_seeds.push((remap_right + 1, right));
-                    } else if left <= remap_left && right >= remap_left {
-                        // overlaps partially on seed's left
-                        // append portion that overlaps (left, remap_left)
-                        println!("{left}-{right} left");
-                        remapped_seeds.push((
-                            (left as i32 + remap_diff) as usize,
-                            (remap_left as i32 + remap_diff) as usize,
-                        ));
-
-                        // append portion that doens't overlap (remap_left, right)
-                        remapped_seeds.push((remap_left + 1, right));
-                    } else {
-                        // overlaps partially on both sides
-                        // append portion that doesn't overlap on left (left, remap_left)
-                        println!("{left}-{right}) both");
-                        remapped_seeds.push((left, remap_left));
-
-                        // append portion that overlaps
-                        remapped_seeds.push((
-                            (remap_left as i32 + 1 + remap_diff) as usize,
-                            (remap_right as i32 + remap_diff) as usize,
-                        ));
-
-                        // append portion that doesn't overlap on right (remap_right, right)
-                        remapped_seeds.push((remap_right + 1, right));
-                    }
-                } else {
-                    remapped_seeds.push((left, right));
-                }
-            }
-
-            // seeds.append(&mut remapped_seeds);
-            // seeds.sort();
-            // println!("remap: {remap_left}-{remap_right}, {remap_diff}   \t| seed: {seeds:?}");
-        }
-    }
-
-    seeds.into_iter().map(|(left, _)| left).min().unwrap()
+    // let mut remapped_seeds: Vec<(usize, usize)> = vec![];
+    // while let Some(line) = lines.next() {
+    //     if line.contains("map") || line.is_empty() {
+    //         continue;
+    //     } else {
+    //         let Remap {
+    //             remap_left,
+    //             remap_right,
+    //             remap_diff,
+    //         } = Remap::from(line.clone());
+    //
+    //         // find out if mapping overlaps with any of the seeds
+    //         // if mapping overlaps with any, update for range
+    //         // let mut seeds = seeds.clone();
+    //         while !seeds.is_empty() {
+    //             let (left, right) = seeds.pop().unwrap();
+    //             if left <= remap_right && right >= remap_left {
+    //                 // complete overlap. numbers in [max(remap_left, seed_left),
+    //                 // min(remap_right, seed_right)] will be remapped
+    //                 if left >= remap_left && right <= remap_right {
+    //                     // seed range is inside remap range
+    //                     println!("{left}-{right} inside");
+    //                     remapped_seeds.push((
+    //                         (left as i32 + remap_diff) as usize,
+    //                         (right as i32 + remap_diff) as usize,
+    //                     ));
+    //                 } else if left <= remap_right && right >= remap_right {
+    //                     // overlaps partially on seed's right
+    //                     // append portion that overlaps (left, remap_right)
+    //                     println!("{left}-{right} right");
+    //                     remapped_seeds.push((
+    //                         (left as i32 + remap_diff) as usize,
+    //                         (remap_right as i32 + remap_diff) as usize,
+    //                     ));
+    //
+    //                     // append portion that doesn't overlap (remap_right, right)
+    //                     remapped_seeds.push((remap_right + 1, right));
+    //                 } else if left <= remap_left && right >= remap_left {
+    //                     // overlaps partially on seed's left
+    //                     // append portion that overlaps (left, remap_left)
+    //                     println!("{left}-{right} left");
+    //                     remapped_seeds.push((left, remap_left));
+    //
+    //                     // append portion that doens't overlap (remap_left, right)
+    //                     remapped_seeds.push((
+    //                         (remap_left as i32 + remap_diff) as usize,
+    //                         (right as i32 + remap_diff) as usize,
+    //                     ));
+    //                 } else {
+    //                     // overlaps partially on both sides
+    //                     // append portion that doesn't overlap on left (left, remap_left)
+    //                     println!("{left}-{right}) both");
+    //                     remapped_seeds.push((left, remap_left));
+    //
+    //                     // append portion that overlaps
+    //                     remapped_seeds.push((
+    //                         (remap_left as i32 + 1 + remap_diff) as usize,
+    //                         (remap_right as i32 + remap_diff) as usize,
+    //                     ));
+    //
+    //                     // append portion that doesn't overlap on right (remap_right, right)
+    //                     remapped_seeds.push((remap_right + 1, right));
+    //                 }
+    //             } else {
+    //                 remapped_seeds.push((left, right));
+    //             }
+    //         }
+    //
+    //         seeds.append(&mut remapped_seeds);
+    //         seeds.sort();
+    //         println!("remap: {remap_left}-{remap_right}, {remap_diff}   \t| seed: {seeds:?}");
+    //     }
+    // }
+    //
+    // seeds.into_iter().map(|(left, _)| left).min().unwrap()
 }
 
 #[cfg(test)]
