@@ -1,0 +1,10 @@
+LR
+
+QQA = (QQB, XXX)
+QQB = (XXX, QQZ)
+QQZ = (QQB, XXX)
+MMA = (MMB, XXX)
+MMB = (MMC, MMC)
+MMC = (MMZ, MMZ)
+MMZ = (MMB, MMB)
+XXX = (XXX, XXX)
